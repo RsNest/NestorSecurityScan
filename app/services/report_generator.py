@@ -129,7 +129,7 @@ def generate_html_report(
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Отчёт сканирования {html.escape(scan_id)}</title>
+<title>Nestor Security Scanner — отчёт {html.escape(scan_id)}</title>
 <style>
 body {{ font-family: system-ui, sans-serif; margin: 1.5rem; color: #1a1a1a; background: #f7f7f5; }}
 h1,h2 {{ margin-bottom: .4rem; }}
@@ -147,7 +147,7 @@ th {{ background: #eee; text-align: left; position: sticky; top: 0; }}
 </style>
 </head>
 <body>
-<h1>Отчёт сканирования образа</h1>
+<h1>Nestor Security Scanner — отчёт сканирования</h1>
 <p>Scan ID: <code>{html.escape(scan_id)}</code></p>
 <div class="meta">
   <div class="card"><div>Образ</div><strong>{html.escape(str(metadata.get("requested_image") or ""))}</strong></div>

@@ -37,7 +37,7 @@ def create_app() -> FastAPI:
     application = FastAPI(
         title=settings.app_name,
         version=__version__,
-        description="Сканирование контейнерных образов с помощью Syft и Grype",
+        description="Nestor Security Scanner — сканирование контейнерных образов с помощью Syft и Grype",
         lifespan=lifespan,
     )
     static_dir = Path(__file__).resolve().parent / "static"

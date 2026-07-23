@@ -22,6 +22,7 @@ router = APIRouter(tags=["web"])
 templates = Jinja2Templates(
     directory=str(Path(__file__).resolve().parent.parent / "templates")
 )
+templates.env.globals["app_name"] = get_settings().app_name
 
 
 def _dashboard_stats() -> dict:

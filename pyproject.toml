@@ -3,9 +3,9 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "image-security-scanner"
+name = "nestor-security-scanner"
 version = "1.0.0"
-description = "Web tool for scanning container images with Syft and Grype"
+description = "Nestor Security Scanner — web tool for scanning container images with Syft and Grype"
 readme = "README.md"
 requires-python = ">=3.12"
 license = { text = "Apache-2.0" }

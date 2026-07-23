@@ -1,6 +1,6 @@
-# Image Security Scanner
+# Nestor Security Scanner
 
-Локальный open-source инструмент для сканирования Docker/OCI-образов на уязвимости с помощью **Syft** (SBOM) и **Grype** (CVE), с веб-интерфейсом, очередью задач, интеграцией Harbor и политиками compliance.
+Локальный open-source инструмент **Nestor Security Scanner** для сканирования Docker/OCI-образов на уязвимости с помощью **Syft** (SBOM) и **Grype** (CVE), с веб-интерфейсом, очередью задач, интеграцией Harbor и политиками compliance.
 
 Репозиторий: https://github.com/RsNest/NestorSecurityScan
 

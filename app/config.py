@@ -14,7 +14,7 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    app_name: str = "image-security-scanner"
+    app_name: str = "Nestor Security Scanner"
     app_env: str = "development"
     web_port: int = 8080
     log_level: str = "INFO"

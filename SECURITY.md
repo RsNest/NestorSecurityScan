@@ -1,4 +1,4 @@
-# Security Policy
+# Nestor Security Scanner — Security Policy
 
 ## Supported versions
 
