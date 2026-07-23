@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}История сканирований{% endblock %}
+{% block content %}
+<h1>История сканирований</h1>
+<form class="filters" method="get">
+  <label>Status <input name="status" value="{{ filters.status }}"/></label>
+  <label>Source <input name="source" value="{{ filters.source }}"/></label>
+  <label>Image <input name="image" value="{{ filters.image }}"/></label>
+  <button class="btn" type="submit">Фильтр</button>
+</form>
+<table>
+  <thead>
+    <tr>
+      <th>Дата</th><th>Image</th><th>Tag</th><th>Digest</th><th>Source</th>
+      <th>Status</th><th>C</th><th>H</th><th>M</th><th>L</th><th>Отчёт</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for s in scans %}
+    <tr>
+      <td>{{ s.created_at }}</td>
+      <td><a href="/scans/{{ s.id }}">{{ s.repository or s.requested_image }}</a></td>
+      <td>{{ s.tag or "—" }}</td>
+      <td class="mono">{{ (s.digest or "—")[:19] }}</td>
+      <td>{{ s.source }}</td>
+      <td><span class="badge status-{{ s.status }}">{{ s.status }}</span></td>
+      <td>{{ s.critical_count }}</td>
+      <td>{{ s.high_count }}</td>
+      <td>{{ s.medium_count }}</td>
+      <td>{{ s.low_count }}</td>
+      <td><a href="/api/v1/scans/{{ s.id }}/report.html">HTML</a></td>
+    </tr>
+    {% else %}
+    <tr><td colspan="11">Нет записей</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

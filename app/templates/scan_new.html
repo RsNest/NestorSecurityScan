@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Новое сканирование{% endblock %}
+{% block content %}
+<h1>Ручное сканирование</h1>
+{% if not grype.ready %}
+<div class="banner {% if grype.last_update_status == 'error' %}banner-error{% else %}banner-warn{% endif %}">
+  {% if grype.bootstrapping or grype.last_update_status == 'updating' %}
+    База уязвимостей ещё загружается. Скан можно поставить в очередь, но выполнение начнётся после готовности worker.
+  {% else %}
+    База уязвимостей не готова — скан, скорее всего, завершится ошибкой.
+    {{ grype.last_error or 'Сначала дождитесь bootstrap или выполните make update-db.' }}
+  {% endif %}
+</div>
+{% endif %}
+{% if error %}<p class="error">{{ error }}</p>{% endif %}
+<form method="post" action="/scans/new" class="form">
+  <label>Image reference
+    <input name="image" required placeholder="alpine:3.20 или harbor.example.ru/proj/app:1.0" value="{{ image or '' }}"/>
+  </label>
+  <label>Registry username
+    <input name="registry_username" autocomplete="username"/>
+  </label>
+  <label>Registry password / token
+    <input name="registry_password" type="password" autocomplete="current-password"/>
+  </label>
+  <label>Platform (опционально)
+    <input name="platform" placeholder="linux/amd64"/>
+  </label>
+  <p class="hint">Пароль не сохраняется. Для Harbor предпочтительно задать credentials в `.env`.</p>
+  <button type="submit" class="btn primary" {% if not grype.ready and grype.last_update_status == 'error' %}disabled title="База Grype не готова"{% endif %}>Scan</button>
+</form>
+{% endblock %}

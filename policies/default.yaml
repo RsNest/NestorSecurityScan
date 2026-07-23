@@ -1,0 +1,23 @@
+version: 1
+
+name: default
+
+fail:
+  severities:
+    - critical
+    - high
+  only_fixed: false
+
+thresholds:
+  critical: 0
+  high: 0
+  medium: 50
+
+kev:
+  fail_if_present: true
+
+epss:
+  enabled: true
+  minimum_probability: 0.70
+
+ignore: []

@@ -1,0 +1,16 @@
+<div id="progress"
+     {% if scan.status in ['QUEUED','RESOLVING_IMAGE','GENERATING_SBOM','SCANNING','APPLYING_POLICY','GENERATING_REPORT','RUNNING'] %}
+     hx-get="/scans/{{ scan.id }}/fragment"
+     hx-trigger="every 2s"
+     hx-swap="outerHTML"
+     {% endif %}>
+  <div class="cards">
+    <div class="card"><div class="label">Статус</div><div class="value"><span class="badge status-{{ scan.status }}">{{ scan.status }}</span></div></div>
+    <div class="card"><div class="label">Этап</div><div class="value">{{ scan.stage }}</div></div>
+    <div class="card"><div class="label">Прогресс</div><div class="value">{{ scan.progress }}%</div></div>
+    <div class="card"><div class="label">C/H/M/L</div><div class="value">{{ scan.critical_count }}/{{ scan.high_count }}/{{ scan.medium_count }}/{{ scan.low_count }}</div></div>
+  </div>
+  <div class="progress-bar"><div style="width: {{ scan.progress }}%"></div></div>
+  <p>{{ scan.message or "" }}</p>
+  {% if scan.digest %}<p class="mono">Digest: {{ scan.digest }}</p>{% endif %}
+</div>

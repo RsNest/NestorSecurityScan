@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Сканирование {{ scan.id if scan else "" }}{% endblock %}
+{% block content %}
+{% if error or not scan %}
+  <p class="error">{{ error or "Сканирование не найдено" }}</p>
+{% else %}
+<h1>Сканирование</h1>
+<p class="mono">{{ scan.requested_image }}</p>
+
+<div id="progress"
+     {% if scan.status in ['QUEUED','RESOLVING_IMAGE','GENERATING_SBOM','SCANNING','APPLYING_POLICY','GENERATING_REPORT','RUNNING'] %}
+     hx-get="/scans/{{ scan.id }}/fragment"
+     hx-trigger="every 2s"
+     hx-swap="outerHTML"
+     {% endif %}>
+  {% include "partials/scan_progress.html" %}
+</div>
+
+<section class="panel actions">
+  <a class="btn" href="/api/v1/scans/{{ scan.id }}/report.html">HTML-отчёт</a>
+  <a class="btn" href="/api/v1/scans/{{ scan.id }}/report.json">JSON</a>
+  <a class="btn" href="/api/v1/scans/{{ scan.id }}/sbom/syft">Syft SBOM</a>
+  <a class="btn" href="/api/v1/scans/{{ scan.id }}/sbom/cyclonedx">CycloneDX</a>
+  <a class="btn" href="/api/v1/scans/{{ scan.id }}/grype">Grype JSON</a>
+  <form method="post" action="/scans/{{ scan.id }}/rescan" style="display:inline">
+    <button class="btn primary" type="submit">Rescan with current vulnerability database</button>
+  </form>
+  <form method="post" action="/scans/{{ scan.id }}/cancel" style="display:inline">
+    <button class="btn" type="submit">Отменить</button>
+  </form>
+  <form method="post" action="/scans/{{ scan.id }}/delete" style="display:inline" onsubmit="return confirm('Удалить отчёт?')">
+    <button class="btn danger" type="submit">Удалить</button>
+  </form>
+</section>
+
+{% if scan.error_message %}
+<p class="error">{{ scan.error_message }}</p>
+{% endif %}
+
+<section class="panel">
+  <h2>Уязвимости</h2>
+  <table>
+    <thead>
+      <tr><th>CVE</th><th>Severity</th><th>Package</th><th>Installed</th><th>Fixed</th><th>EPSS</th><th>KEV</th><th>Ignored</th></tr>
+    </thead>
+    <tbody>
+      {% for v in vulns %}
+      <tr>
+        <td>{{ v.id }}</td>
+        <td>{{ v.severity }}</td>
+        <td>{{ v.package_name }}</td>
+        <td>{{ v.installed_version }}</td>
+        <td>{{ v.fixed_version or "" }}</td>
+        <td>{{ v.epss if v.epss is not none else "" }}</td>
+        <td>{{ "KEV" if v.kev else "" }}</td>
+        <td>{{ v.ignore_reason or "" }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="8">Пока нет данных (дождитесь завершения скана)</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section class="panel">
+  <h2>Лог</h2>
+  <pre class="log">{{ log_tail or "—" }}</pre>
+</section>
+{% endif %}
+{% endblock %}

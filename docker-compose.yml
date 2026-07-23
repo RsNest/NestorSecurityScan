@@ -1,0 +1,126 @@
+services:
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+    # Official Redis image drops privileges via setpriv; do not cap_drop ALL here.
+
+  api:
+    build:
+      context: .
+      args:
+        SYFT_VERSION: "1.48.0"
+        GRYPE_VERSION: "0.116.0"
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8080
+    ports:
+      - "${WEB_PORT:-8080}:8080"
+    env_file:
+      - .env
+    environment:
+      SERVICE_NAME: api
+    volumes:
+      - scanner-data:/data
+      - ./policies:/policies:ro
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/api/v1/health', timeout=3)",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 25s
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp
+
+  worker:
+    build:
+      context: .
+      args:
+        SYFT_VERSION: "1.48.0"
+        GRYPE_VERSION: "0.116.0"
+    command: python -m app.workers.worker
+    env_file:
+      - .env
+    environment:
+      SERVICE_NAME: worker
+    volumes:
+      - scanner-data:/data
+      - ./policies:/policies:ro
+      - ./certs:/certs:ro
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      # Healthy only when Grype DB has been bootstrapped (first start may take several minutes)
+      test: ["CMD", "python", "-m", "app.workers.worker", "healthcheck"]
+      interval: 20s
+      timeout: 10s
+      retries: 60
+      start_period: 600s
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    # Worker needs write to /tmp for auth configs and tool caches
+    tmpfs:
+      - /tmp
+
+  scheduler:
+    build:
+      context: .
+      args:
+        SYFT_VERSION: "1.48.0"
+        GRYPE_VERSION: "0.116.0"
+    command: python -m app.workers.scheduler
+    env_file:
+      - .env
+    environment:
+      SERVICE_NAME: scheduler
+    volumes:
+      - scanner-data:/data
+      - ./policies:/policies:ro
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    tmpfs:
+      - /tmp
+
+  demo-registry:
+    profiles: ["demo"]
+    image: registry:2
+    ports:
+      - "5001:5000"
+    volumes:
+      - demo-registry-data:/var/lib/registry
+    restart: unless-stopped
+
+volumes:
+  scanner-data:
+  redis-data:
+  demo-registry-data:

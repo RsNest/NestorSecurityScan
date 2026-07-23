@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Harbor{% endblock %}
+{% block content %}
+<h1>Harbor Registry</h1>
+<section class="panel">
+  <p>URL: <strong>{{ status.url or "—" }}</strong></p>
+  <p>Статус:
+    {% if status.reachable %}
+      <span class="badge ok">доступен</span>
+    {% elif status.reachable is sameas false %}
+      <span class="badge bad">недоступен</span>
+    {% else %}
+      <span class="badge">не настроен</span>
+    {% endif %}
+    — {{ status.message }}
+  </p>
+  <p class="hint">Секреты Harbor хранятся только в `.env` (HARBOR_URL, HARBOR_USERNAME, HARBOR_PASSWORD).</p>
+</section>
+
+{% if error %}<p class="error">{{ error }}</p>{% endif %}
+
+{% if projects %}
+<section class="panel">
+  <h2>Проекты</h2>
+  <ul class="list">
+    {% for p in projects %}
+    <li><a href="/harbor?project={{ p.name }}">{{ p.name }}</a></li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+{% if selected_project %}
+<section class="panel">
+  <h2>Репозитории: {{ selected_project }}</h2>
+  <ul class="list">
+    {% for r in repositories %}
+      {% set short = r.name.replace(selected_project ~ '/', '') %}
+      <li><a href="/harbor?project={{ selected_project }}&repository={{ short }}">{{ r.name }}</a></li>
+    {% else %}
+      <li>Нет репозиториев</li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+{% if artifacts %}
+<section class="panel">
+  <h2>Артефакты: {{ selected_project }}/{{ selected_repository }}</h2>
+  <form method="post" action="/harbor/scan">
+    <table>
+      <thead>
+        <tr><th></th><th>Tags</th><th>Digest</th><th>Size</th><th>Push time</th></tr>
+      </thead>
+      <tbody>
+        {% for a in artifacts %}
+        <tr>
+          <td><input type="checkbox" name="images" value="{{ a._image_ref }}"/></td>
+          <td>{% for t in a.tags or [] %}{{ t.name }} {% endfor %}</td>
+          <td class="mono">{{ a.digest }}</td>
+          <td>{{ a.size or "—" }}</td>
+          <td>{{ a.push_time or "—" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <button class="btn primary" type="submit">Сканировать выбранные</button>
+  </form>
+</section>
+{% endif %}
+{% endblock %}

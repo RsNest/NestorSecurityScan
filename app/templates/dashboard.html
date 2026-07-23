@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}Дашборд — Image Security Scanner{% endblock %}
+{% block content %}
+<h1>Дашборд</h1>
+
+{% if not grype.ready %}
+<section class="banner {% if grype.last_update_status == 'error' %}banner-error{% else %}banner-warn{% endif %}">
+  {% if grype.bootstrapping or grype.last_update_status == 'updating' %}
+    <strong>Первичная загрузка базы уязвимостей Grype.</strong>
+    Скачивание может занять несколько минут (~1&nbsp;GB). Worker ещё не принимает сканы (или только что стартовал).
+    Обновите страницу через минуту. Статус: <code>{{ grype.last_update_status or 'not_ready' }}</code>
+  {% elif grype.last_update_status == 'error' %}
+    <strong>База уязвимостей не готова.</strong>
+    {{ grype.last_error or 'Требуется сеть до grype.anchore.io. Выполните make update-db.' }}
+  {% else %}
+    <strong>База уязвимостей ещё не загружена.</strong>
+    Дождитесь завершения bootstrap worker или выполните <code>make update-db</code>.
+  {% endif %}
+</section>
+{% endif %}
+
+<section class="cards">
+  <div class="card"><div class="label">Всего сканов</div><div class="value">{{ stats.total }}</div></div>
+  <div class="card ok"><div class="label">Compliant</div><div class="value">{{ stats.compliant }}</div></div>
+  <div class="card bad"><div class="label">Non-compliant</div><div class="value">{{ stats.non_compliant }}</div></div>
+  <div class="card warn"><div class="label">В работе / очередь</div><div class="value">{{ stats.running }}</div></div>
+</section>
+
+<section class="panel">
+  <h2>База Grype</h2>
+  <p>
+    Ready:
+    {% if grype.ready %}
+      <span class="badge ok">да</span>
+    {% else %}
+      <span class="badge bad">нет</span>
+    {% endif %}
+    · Built: <strong>{{ grype.built_at or "—" }}</strong>
+    · Schema: <strong>{{ grype.schema_version or "—" }}</strong>
+    · Статус обновления:
+    {% if grype.stale %}
+      <span class="badge bad">устарела / ошибка</span>
+    {% elif grype.last_update_status == 'updating' %}
+      <span class="badge warn">загрузка…</span>
+    {% else %}
+      <span class="badge ok">{{ grype.last_update_status or "—" }}</span>
+    {% endif %}
+  </p>
+  {% if grype.last_error %}<p class="error">{{ grype.last_error }}</p>{% endif %}
+</section>
+
+<section class="panel">
+  <h2>Последние сканирования</h2>
+  <table>
+    <thead>
+      <tr><th>Дата</th><th>Образ</th><th>Источник</th><th>Статус</th><th>C/H/M/L</th></tr>
+    </thead>
+    <tbody>
+      {% for s in stats.recent %}
+      <tr>
+        <td>{{ s.created_at }}</td>
+        <td><a href="/scans/{{ s.id }}">{{ s.requested_image }}</a></td>
+        <td>{{ s.source }}</td>
+        <td><span class="badge status-{{ s.status }}">{{ s.status }}</span></td>
+        <td>{{ s.critical_count }}/{{ s.high_count }}/{{ s.medium_count }}/{{ s.low_count }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5">Пока нет сканирований. <a href="/scans/new">Запустить первое</a></td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section class="panel">
+  <h2>Наиболее уязвимые образы</h2>
+  <table>
+    <thead><tr><th>Образ</th><th>Critical</th><th>High</th><th>Статус</th></tr></thead>
+    <tbody>
+      {% for s in stats.vulnerable %}
+      <tr>
+        <td><a href="/scans/{{ s.id }}">{{ s.requested_image }}</a></td>
+        <td>{{ s.critical_count }}</td>
+        <td>{{ s.high_count }}</td>
+        <td>{{ s.status }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4">Нет данных</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

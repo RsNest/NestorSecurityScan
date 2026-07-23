@@ -1,0 +1,51 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "image-security-scanner"
+version = "1.0.0"
+description = "Web tool for scanning container images with Syft and Grype"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "Apache-2.0" }
+authors = [{ name = "NestorSecurityScan contributors" }]
+dependencies = [
+  "fastapi>=0.115.0",
+  "uvicorn[standard]>=0.32.0",
+  "sqlalchemy>=2.0.36",
+  "pydantic>=2.10.0",
+  "pydantic-settings>=2.6.0",
+  "redis>=5.2.0",
+  "rq>=2.0.0",
+  "apscheduler>=3.10.4",
+  "httpx>=0.28.0",
+  "jinja2>=3.1.4",
+  "python-multipart>=0.0.17",
+  "pyyaml>=6.0.2",
+  "email-validator>=2.2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.3.0",
+  "pytest-asyncio>=0.24.0",
+  "ruff>=0.8.0",
+  "httpx>=0.28.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["app*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+asyncio_mode = "auto"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "UP"]

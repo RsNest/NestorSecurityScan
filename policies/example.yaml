@@ -1,0 +1,27 @@
+version: 1
+
+name: example
+
+fail:
+  severities:
+    - critical
+  only_fixed: false
+
+thresholds:
+  critical: 0
+  high: 5
+  medium: 100
+
+kev:
+  fail_if_present: false
+
+epss:
+  enabled: false
+  minimum_probability: 0.90
+
+ignore:
+  - vulnerability: CVE-2025-12345
+    package: openssl
+    reason: Not reachable in runtime
+    approved_by: security-team
+    expires_at: 2026-12-31
