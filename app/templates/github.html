@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}GitHub — {{ app_name }}{% endblock %}
+{% block content %}
+<h1>GitHub Container Registry</h1>
+
+<section class="panel">
+  <h2>Статус подключения</h2>
+  <ul class="kv">
+    <li><span>Token</span>
+      {% if status.enabled %}<span class="badge ok">задан</span>{% else %}<span class="badge bad">не задан</span>{% endif %}
+    </li>
+    <li><span>GitHub</span>
+      {% if status.reachable == True %}<span class="badge ok">доступен</span>
+      {% elif status.reliable == False %}<span class="badge bad">ошибка</span>
+      {% else %}<span class="badge warn">не проверено</span>{% endif %}
+    </li>
+    <li><span>Сообщение</span><strong>{{ status.message or "—" }}</strong></li>
+  </ul>
+  {% if error %}<p class="error">{{ error }}</p>{% endif %}
+  {% if not status.enabled %}
+  <p class="hint">Создайте PAT на GitHub (<a href="https://github.com/settings/tokens" target="_blank">Settings → Developer settings → Personal access tokens</a>)
+    с правами <code>read:packages</code> и укажите его в <code>.env</code> как <code>GITHUB_TOKEN</code>.</p>
+  {% endif %}
+</section>
+
+{% if status.reachable %}
+<section class="panel">
+  <h2>Owner (организация или пользователь)</h2>
+  <form method="get" class="filters">
+    <label>Owner
+      <input name="owner" value="{{ selected_owner or '' }}" placeholder="например, RsNest" required/>
+    </label>
+    <button class="primary" type="submit">Показать пакеты</button>
+  </form>
+</section>
+
+{% if selected_owner %}
+<section class="panel">
+  <h2>Container-пакеты</h2>
+  {% if packages %}
+  <table>
+    <thead><tr><th>Имя</th><th>Видимость</th><th></th></tr></thead>
+    <tbody>
+      {% for p in packages %}
+      <tr>
+        <td><strong>{{ p.name }}</strong></td>
+        <td><span class="badge">{{ p.visibility or "—" }}</span></td>
+        <td>
+          <a class="btn subtle" href="/github?owner={{ selected_owner }}&package={{ p.name }}">Теги →</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}<p class="hint">Пакетов не найдено.</p>{% endif %}
+</section>
+{% endif %}
+
+{% if selected_package %}
+<section class="panel">
+  <h2>Версии пакета <code>{{ selected_owner }}/{{ selected_package }}</code></h2>
+  {% if image_refs %}
+  <form method="post" action="/github/scan">
+    <table>
+      <thead>
+        <tr><th></th><th>Образ (по digest)</th><th>Тег</th></tr>
+      </thead>
+      <tbody>
+        {% for r in image_refs %}
+        <tr>
+          <td><input type="checkbox" name="images" value="{{ r }}" checked/></td>
+          <td class="mono">{{ r }}</td>
+          <td>—</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div class="actions" style="margin-top:0.75rem">
+      <button class="primary" type="submit">Поставить выбранные в очередь</button>
+    </div>
+  </form>
+  {% else %}<p class="hint">Не удалось получить теги/дайджесты.</p>{% endif %}
+</section>
+{% endif %}
+{% endif %}
+{% endblock %}

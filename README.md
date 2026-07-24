@@ -8,11 +8,16 @@
 
 - Ручное сканирование образа по имени или digest
 - Интеграция с Harbor (проекты / репозитории / артефакты)
+- Интеграция с GitHub Container Registry (ghcr.io) — владелец → пакет → теги → scan
 - Webhook Harbor `PUSH_ARTIFACT` → фоновое сканирование (`202 Accepted`)
 - Периодический discovery новых образов
+- Авто-rescan всех сканов за последние N дней после обновления базы Grype
 - Policy engine на YAML (severity, thresholds, KEV, EPSS, ignore)
 - Отчёты: JSON, Syft SBOM, CycloneDX, Grype JSON, автономный HTML
 - Rescan SBOM без повторной загрузки образа
+- Аутентификация пользователей (admin/operator/viewer) + cookie-сессии + legacy X-API-Key для CI
+- Светлая/тёмная тема (auto-scheme + ручной тоггл)
+- Дашборд Security Posture: KEV, Critical/High, динамика за 7 дней, топ-5 уязвимых
 - SQLite + файловые отчёты в Docker volume
 
 ## Архитектура
@@ -39,7 +44,9 @@ cp .env.example .env
 docker compose up -d --build
 ```
 
-Откройте http://localhost:8080
+Откройте http://localhost:8080 — вы увидите экран входа.
+
+**Учётные данные по умолчанию:** `admin` / `admin` (смените после первого входа в разделе «Пользователи»). Задаются через `ADMIN_USER` / `ADMIN_PASSWORD` в `.env`. Если в БД уже есть пользователи — bootstrap не срабатывает.
 
 Пример скана:
 
@@ -54,7 +61,12 @@ make scan IMAGE=alpine:3.20
 | Переменная | Описание |
 |---|---|
 | `WEB_PORT` | Порт веб-UI (по умолчанию 8080) |
-| `API_KEY` | Ключ для мутирующих API (`X-API-Key`). Пустой = без защиты (только demo) |
+| `ADMIN_USER` / `ADMIN_PASSWORD` | Bootstrap-администратор (только если таблица users пуста) |
+| `SESSION_SECRET` | Секрет для подписи cookie-сессий (≥ 32 символов) |
+| `API_KEY` | Legacy-ключ для мутирующих API (`X-API-Key`). Пустой = без ключа (но требуется сессия) |
+| `GITHUB_TOKEN` | PAT с правами `read:packages` для страницы GitHub |
+| `RESCAN_AFTER_DB_UPDATE` | Авто-rescan сканов после обновления Grype DB (по умолчанию true) |
+| `RESCAN_RECENT_DAYS` | За сколько последних дней ресканить (по умолчанию 30) |
 | `DATABASE_URL` | SQLite URL |
 | `REDIS_URL` | Redis для очереди RQ |
 | `MAX_CONCURRENT_SCANS` | Ориентир параллелизма (масштабируйте `worker`) |

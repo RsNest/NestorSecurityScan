@@ -16,6 +16,7 @@ from app.models import Scan
 from app.services.discovery import discover_and_enqueue
 from app.services.grype_db import ensure_grype_db, update_grype_db
 from app.services.report_generator import delete_report_dir
+from app.services.rescan import enqueue_rescan_recent
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +37,12 @@ def job_grype_db_update() -> None:
             status.last_update_status,
             status.built_at,
         )
+        if status.last_update_status == "ok":
+            try:
+                n = enqueue_rescan_recent()
+                logger.info("Auto-rescan enqueued %s scans after DB update", n)
+            except Exception:  # noqa: BLE001
+                logger.exception("Auto-rescan after DB update failed")
     except Exception:  # noqa: BLE001
         logger.exception("Grype DB update job failed")
 

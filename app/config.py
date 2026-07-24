@@ -30,6 +30,17 @@ class Settings(BaseSettings):
 
     policy_file: Path = Path("/policies/default.yaml")
     api_key: str = ""
+    session_secret: str = "change-me-in-prod-please-32-chars-minimum"
+    session_max_age_seconds: int = 60 * 60 * 12
+
+    admin_user: str = ""
+    admin_password: str = ""
+
+    rescan_after_db_update: bool = True
+    rescan_recent_days: int = 30
+
+    github_token: str = ""
+    github_registry_enabled: bool = False
 
     harbor_enabled: bool = False
     harbor_url: str = ""

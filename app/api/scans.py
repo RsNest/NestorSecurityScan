@@ -12,6 +12,7 @@ from app.database import session_scope
 from app.errors import ImageReferenceError, ScannerError
 from app.models import Scan
 from app.schemas import ScanCreate, ScanSummary
+from app.services.auth import CurrentUser, require_role
 from app.services.report_generator import delete_report_dir, safe_report_dir
 from app.workers.queue import cancel_job, enqueue_scan
 
@@ -56,7 +57,10 @@ def _to_summary(scan: Scan) -> ScanSummary:
 
 
 @router.post("", response_model=ScanSummary, status_code=status.HTTP_201_CREATED)
-def create_scan(body: ScanCreate, _: None = Depends(require_api_key)) -> ScanSummary:
+def create_scan(
+    body: ScanCreate,
+    _: CurrentUser = Depends(require_role("operator")),
+) -> ScanSummary:
     try:
         scan, created = enqueue_scan(
             image=body.image,
@@ -107,7 +111,10 @@ def get_scan(scan_id: str) -> ScanSummary:
 
 
 @router.post("/{scan_id}/rescan", response_model=ScanSummary, status_code=201)
-def rescan(scan_id: str, _: None = Depends(require_api_key)) -> ScanSummary:
+def rescan(
+    scan_id: str,
+    _: CurrentUser = Depends(require_role("operator")),
+) -> ScanSummary:
     with session_scope() as session:
         parent = session.get(Scan, scan_id)
         if not parent:
@@ -124,7 +131,10 @@ def rescan(scan_id: str, _: None = Depends(require_api_key)) -> ScanSummary:
 
 
 @router.post("/{scan_id}/cancel", response_model=ScanSummary)
-def cancel(scan_id: str, _: None = Depends(require_api_key)) -> ScanSummary:
+def cancel(
+    scan_id: str,
+    _: CurrentUser = Depends(require_role("operator")),
+) -> ScanSummary:
     with session_scope() as session:
         scan = session.get(Scan, scan_id)
         if not scan:
@@ -138,7 +148,10 @@ def cancel(scan_id: str, _: None = Depends(require_api_key)) -> ScanSummary:
 
 
 @router.delete("/{scan_id}", status_code=204)
-def delete_scan(scan_id: str, _: None = Depends(require_api_key)) -> None:
+def delete_scan(
+    scan_id: str,
+    _: CurrentUser = Depends(require_role("admin")),
+) -> None:
     with session_scope() as session:
         scan = session.get(Scan, scan_id)
         if not scan:

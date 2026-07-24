@@ -5,19 +5,36 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>{% block title %}{{ app_name }}{% endblock %}</title>
   <link rel="stylesheet" href="/static/css/app.css"/>
+  <script src="/static/js/app.js" defer></script>
   <script src="/static/js/htmx.min.js" defer></script>
 </head>
 <body>
   <header class="topbar">
-    <a class="brand" href="/">{{ app_name }}</a>
+    <a class="brand" href="/">
+      <span class="brand-mark">N</span>
+      <span>{{ app_name }}</span>
+    </a>
     <nav>
       <a href="/" class="{% if page == 'dashboard' %}active{% endif %}">Дашборд</a>
       <a href="/scans/new" class="{% if page == 'new' %}active{% endif %}">Сканировать</a>
       <a href="/scans" class="{% if page == 'scans' %}active{% endif %}">История</a>
       <a href="/harbor" class="{% if page == 'harbor' %}active{% endif %}">Harbor</a>
+      <a href="/github" class="{% if page == 'github' %}active{% endif %}">GitHub</a>
       <a href="/settings" class="{% if page == 'settings' %}active{% endif %}">Настройки</a>
+      {% if current_user and current_user.role == 'admin' %}
+        <a href="/users" class="{% if page == 'users' %}active{% endif %}">Пользователи</a>
+      {% endif %}
       <a href="/docs" target="_blank">API</a>
     </nav>
+    <div class="nav-right">
+      <button id="themeToggle" class="theme-toggle" type="button" title="Сменить тему">◐</button>
+      {% if current_user %}
+        <span class="user-menu"><strong>{{ current_user.username }}</strong> · {{ current_user.role }}</span>
+        <form method="post" action="/logout" style="display:inline">
+          <button class="btn subtle" type="submit">Выйти</button>
+        </form>
+      {% endif %}
+    </div>
   </header>
   <main class="container">
     {% block content %}{% endblock %}

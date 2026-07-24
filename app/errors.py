@@ -44,6 +44,10 @@ class HarborError(ScannerError):
     pass
 
 
+class RegistryError(ScannerError):
+    pass
+
+
 def map_subprocess_error(tool: str, stderr: str, returncode: int | None = None) -> ScannerError:
     text = (stderr or "").lower()
     if "unauthorized" in text or "401" in text or "authentication required" in text:

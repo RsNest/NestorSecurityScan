@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Пользователи — {{ app_name }}{% endblock %}
+{% block content %}
+<h1>Пользователи</h1>
+
+{% if error %}<p class="error">{{ error }}</p>{% endif %}
+{% if ok %}<p class="banner banner-ok">{{ ok }}</p>{% endif %}
+
+<section class="panel">
+  <h2>Список</h2>
+  <table>
+    <thead><tr><th>#</th><th>Имя</th><th>Роль</th><th>Активен</th><th>Создан</th><th>Последний вход</th><th></th></tr></thead>
+    <tbody>
+      {% for u in users %}
+      <tr>
+        <td>{{ u.id }}</td>
+        <td><strong>{{ u.username }}</strong></td>
+        <td><span class="badge">{{ u.role }}</span></td>
+        <td>{% if u.is_active %}<span class="badge ok">да</span>{% else %}<span class="badge bad">нет</span>{% endif %}</td>
+        <td>{{ u.created_at }}</td>
+        <td>{{ u.last_login_at or "—" }}</td>
+        <td>
+          <form method="post" action="/users/{{ u.id }}/delete" style="display:inline"
+                onsubmit="return confirm('Удалить пользователя {{ u.username }}?')">
+            <button class="btn subtle" type="submit" {% if u.id == current_user.id %}disabled{% endif %}>Удалить</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section class="panel">
+  <h2>Создать пользователя</h2>
+  <form method="post" action="/users/new" class="form">
+    <label>Имя пользователя
+      <input name="username" required minlength="1" maxlength="64"/>
+    </label>
+    <label>Пароль (≥ 8 символов)
+      <input name="password" type="password" required minlength="8"/>
+    </label>
+    <label>Роль
+      <select name="role">
+        <option value="viewer">viewer — только чтение</option>
+        <option value="operator" selected>operator — сканировать, отменять</option>
+        <option value="admin">admin — полный доступ, управление пользователями</option>
+      </select>
+    </label>
+    <button class="primary" type="submit">Создать</button>
+  </form>
+</section>
+{% endblock %}

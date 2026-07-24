@@ -8,6 +8,7 @@ from app.api.deps import require_api_key
 from app.config import get_settings
 from app.errors import HarborError
 from app.schemas import HarborScanRequest, HarborStatus, ScanSummary
+from app.services.auth import CurrentUser, require_role
 from app.services.harbor_client import HarborClient
 from app.workers.queue import enqueue_scan
 from app.api.scans import _to_summary
@@ -86,7 +87,10 @@ def list_artifacts(project: str, repository: str) -> list[dict]:
 
 
 @router.post("/scan", response_model=list[ScanSummary])
-def harbor_scan(body: HarborScanRequest, _: None = Depends(require_api_key)) -> list[ScanSummary]:
+def harbor_scan(
+    body: HarborScanRequest,
+    _: CurrentUser = Depends(require_role("operator")),
+) -> list[ScanSummary]:
     results = []
     for image in body.images:
         scan, _ = enqueue_scan(image=image, source="harbor", platform=body.platform)

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Вход — {{ app_name }}{% endblock %}
+{% block content %}
+<div class="login-page">
+  <div class="login-card">
+    <h1>Вход в {{ app_name }}</h1>
+    <p class="muted">Используйте учётные данные, выданные администратором.</p>
+    {% if error %}
+      <div class="error">{{ error }}</div>
+    {% endif %}
+    <form method="post" action="/login" class="form">
+      <label>Имя пользователя
+        <input name="username" autocomplete="username" autofocus required/>
+      </label>
+      <label>Пароль
+        <input name="password" type="password" autocomplete="current-password" required/>
+      </label>
+      <button class="primary" type="submit">Войти</button>
+    </form>
+    <p class="hint" style="margin-top:1rem">
+      По умолчанию: <span class="kbd">admin</span> / <span class="kbd">admin</span> —
+      смените при первом входе.
+    </p>
+  </div>
+</div>
+{% endblock %}

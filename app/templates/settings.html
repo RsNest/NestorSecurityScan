@@ -8,12 +8,21 @@
 </p>
 
 <section class="panel">
+  <h2>Аккаунт</h2>
+  <ul class="kv">
+    <li><span>Пользователь</span><strong>{{ current_user.username }}</strong></li>
+    <li><span>Роль</span><strong>{{ current_user.role }}</strong></li>
+    <li><span>Тема</span><strong>управляется в шапке (◐)</strong></li>
+  </ul>
+</section>
+
+<section class="panel">
   <h2>Приложение</h2>
   <ul class="kv">
     <li><span>APP_NAME</span><strong>{{ settings.app_name }}</strong></li>
     <li><span>APP_ENV</span><strong>{{ settings.app_env }}</strong></li>
     <li><span>POLICY_FILE</span><strong>{{ settings.policy_file }}</strong></li>
-    <li><span>API_KEY</span><strong>{% if api_key_set %}задан{% else %}<span class="badge bad">не задан</span>{% endif %}</strong></li>
+    <li><span>API_KEY (legacy, для CI)</span><strong>{% if api_key_set %}задан{% else %}<span class="badge bad">не задан</span>{% endif %}</strong></li>
     <li><span>MAX_CONCURRENT_SCANS</span><strong>{{ settings.max_concurrent_scans }}</strong></li>
     <li><span>SCAN_TIMEOUT_MINUTES</span><strong>{{ settings.scan_timeout_minutes }}</strong></li>
     <li><span>REPORT_RETENTION_DAYS</span><strong>{{ settings.report_retention_days }}</strong></li>
@@ -28,6 +37,23 @@
     <li><span>DISCOVERY_ENABLED</span><strong>{{ settings.discovery_enabled }}</strong></li>
     <li><span>DISCOVERY_INTERVAL_MINUTES</span><strong>{{ settings.discovery_interval_minutes }}</strong></li>
   </ul>
+</section>
+
+<section class="panel">
+  <h2>GitHub Container Registry</h2>
+  <ul class="kv">
+    <li><span>GITHUB_TOKEN</span><strong>{% if settings.github_token %}задан{% else %}<span class="badge bad">не задан</span>{% endif %}</strong></li>
+  </ul>
+  <p class="hint">Нужен PAT с правами <code>read:packages</code>. Используется на странице <a href="/github">GitHub</a>.</p>
+</section>
+
+<section class="panel">
+  <h2>Auto-Rescan</h2>
+  <ul class="kv">
+    <li><span>RESCAN_AFTER_DB_UPDATE</span><strong>{{ settings.rescan_after_db_update }}</strong></li>
+    <li><span>RESCAN_RECENT_DAYS</span><strong>{{ settings.rescan_recent_days }}</strong></li>
+  </ul>
+  <p class="hint">После каждого успешного обновления базы Grype сканер автоматически ставит в очередь rescan всех сканов за последние N дней.</p>
 </section>
 
 <section class="panel">
