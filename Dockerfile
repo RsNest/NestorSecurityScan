@@ -34,7 +34,6 @@ WORKDIR /app
 COPY pyproject.toml README.md LICENSE ./
 COPY app ./app
 COPY policies ./policies
-COPY scripts ./scripts
 
 RUN pip install --upgrade pip \
     && pip install . \

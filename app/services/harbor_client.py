@@ -150,12 +150,5 @@ class HarborClient:
         if not digest:
             return None
         host = self.base.replace("https://", "").replace("http://", "").split("/")[0]
-        repo = repository
-        if not repo.startswith(f"{project}/"):
-            repo = f"{project}/{repository}" if not repository.startswith(project) else repository
-        # repository from Harbor list often includes project name
-        if repository.startswith(f"{project}/"):
-            full_repo = repository
-        else:
-            full_repo = f"{project}/{repository}"
+        full_repo = repository if repository.startswith(f"{project}/") else f"{project}/{repository}"
         return f"{host}/{full_repo}@{digest}"
