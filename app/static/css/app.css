@@ -75,13 +75,50 @@ a:hover { text-decoration: underline; }
   top: 0;
   z-index: 10;
 }
-.brand { font-weight: 700; font-size: 1.1rem; color: var(--text); display: flex; align-items: center; gap: 0.5rem; }
-.brand-mark { width: 28px; height: 28px; border-radius: 8px; background: linear-gradient(135deg, var(--accent), var(--info)); display: inline-flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 0.9rem; }
+.brand {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--text);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  white-space: nowrap;
+  min-width: 0;
+}
+.brand-mark {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--accent), var(--info));
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 800;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+.brand-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 nav { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
 nav a { color: var(--muted); padding: 0.35rem 0.6rem; border-radius: 6px; font-size: 0.92rem; }
 nav a.active, nav a:hover { color: var(--text); background: var(--accent-soft); text-decoration: none; }
 .nav-right { display: flex; align-items: center; gap: 0.5rem; }
-.theme-toggle { background: transparent; border: 1px solid var(--line); color: var(--text); padding: 0.35rem 0.55rem; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
+.theme-toggle {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--text);
+  padding: 0.45rem 0.75rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.88rem;
+  white-space: nowrap;
+  min-width: 110px;
+  text-align: center;
+}
 .theme-toggle:hover { background: var(--accent-soft); }
 .user-menu { color: var(--muted); font-size: 0.88rem; padding: 0.35rem 0.55rem; border-radius: 6px; }
 .user-menu strong { color: var(--text); }
