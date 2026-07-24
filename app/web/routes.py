@@ -12,12 +12,11 @@ from fastapi.templating import Jinja2Templates
 from app.config import get_settings
 from app.database import session_scope
 from app.errors import HarborError, ImageReferenceError
-from app.models import ACTIVE_SCAN_STATUSES, Scan
+from app.models import Scan
 from app.services.auth import (
     SESSION_COOKIE,
     CurrentUser,
     authenticate,
-    get_current_user,
     issue_session,
     read_session,
 )

@@ -3,9 +3,7 @@
 from __future__ import annotations
 
 import logging
-import shutil
-from datetime import datetime, timedelta, timezone
-from pathlib import Path
+from datetime import UTC, datetime, timedelta
 
 from apscheduler.schedulers.blocking import BlockingScheduler
 
@@ -49,7 +47,7 @@ def job_grype_db_update() -> None:
 
 def job_retention() -> None:
     settings = get_settings()
-    cutoff = datetime.now(timezone.utc) - timedelta(days=settings.report_retention_days)
+    cutoff = datetime.now(UTC) - timedelta(days=settings.report_retention_days)
     try:
         with session_scope() as session:
             old = (

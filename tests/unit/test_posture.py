@@ -1,11 +1,10 @@
 """Tests for security_posture aggregator and rescan helper."""
 
-from datetime import datetime, timedelta, timezone
+from datetime import timedelta
 
 from app.database import session_scope
 from app.models import Scan, utcnow
 from app.services.posture import security_posture
-from app.services.rescan import enqueue_rescan_recent
 
 
 def _mk_scan(digest: str, status: str, days_ago: int, c: int = 0, h: int = 0, kev: int = 0):
@@ -32,8 +31,8 @@ def test_security_posture_aggregates(tmp_path, monkeypatch):
     monkeypatch.setenv("SESSION_SECRET", "x" * 40)
     from app.config import get_settings
     get_settings.cache_clear()
-    from app.database import Base, create_db_engine
     import app.database as db_mod
+    from app.database import Base, create_db_engine
     db_mod.engine = create_db_engine(f"sqlite:///{db}")
     db_mod.SessionLocal.configure(bind=db_mod.engine)
     Base.metadata.create_all(bind=db_mod.engine)

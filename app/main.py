@@ -10,7 +10,8 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from app import __version__
-from app.api import auth, harbor, health, scans, settings as settings_api, webhooks
+from app.api import auth, harbor, health, scans, webhooks
+from app.api import settings as settings_api
 from app.config import get_settings
 from app.database import init_db
 from app.logging_setup import setup_logging

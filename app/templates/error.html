@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}{{ status_code }} — {{ app_name }}{% endblock %}
+{% block content %}
+<section class="panel" style="text-align:center; max-width:520px; margin:3rem auto">
+  <h1 style="font-size:3rem; margin:0">{{ status_code }}</h1>
+  <h2 style="margin-top:0.3rem">{{ title }}</h2>
+  <p class="hint">{{ message }}</p>
+  {% if back_url %}
+    <p><a class="btn primary" href="{{ back_url }}">{{ back_label }}</a></p>
+  {% endif %}
+</section>
+{% endblock %}

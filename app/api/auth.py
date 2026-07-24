@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from pydantic import BaseModel, Field
 
 from app.config import get_settings
@@ -14,8 +14,8 @@ from app.services.auth import (
     ROLE_ADMIN,
     ROLE_OPERATOR,
     ROLE_VIEWER,
-    CurrentUser,
     SESSION_COOKIE,
+    CurrentUser,
     authenticate,
     hash_password,
     issue_session,

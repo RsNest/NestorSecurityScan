@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 from collections import Counter
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from app.database import session_scope
-from app.models import Scan, TERMINAL_STATUSES
+from app.models import TERMINAL_STATUSES, Scan
 
 
 def security_posture(window_days: int = 7) -> dict:
     """Return dashboard-friendly aggregate stats."""
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     window_start = now - timedelta(days=window_days)
     # SQLite returns naive datetimes; normalise to UTC-naive for comparison
     if now.tzinfo is not None:

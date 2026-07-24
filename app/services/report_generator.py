@@ -5,7 +5,7 @@ from __future__ import annotations
 import html
 import json
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -38,7 +38,7 @@ def create_report_dir(scan_id: str) -> Path:
 def append_scan_log(scan_id: str, message: str) -> None:
     path = safe_report_dir(scan_id) / "scan.log"
     path.parent.mkdir(parents=True, exist_ok=True)
-    ts = datetime.now(timezone.utc).isoformat()
+    ts = datetime.now(UTC).isoformat()
     with path.open("a", encoding="utf-8") as fh:
         fh.write(f"[{ts}] {message}\n")
 

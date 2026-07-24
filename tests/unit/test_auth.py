@@ -1,7 +1,6 @@
 """Tests for auth (password hashing, sessions, RBAC)."""
 
 import pytest
-from fastapi.testclient import TestClient
 
 from app.services.auth import (
     ROLE_ADMIN,
@@ -82,3 +81,46 @@ def test_bootstrap_admin_creates_only_if_empty(tmp_path, monkeypatch):
     ensure_bootstrap_admin()
     with session_scope() as s:
         assert s.query(User).count() == 1
+
+
+def test_authorize_403_when_role_too_low(tmp_path, monkeypatch):
+    """A valid session whose role is below the required minimum must yield 403,
+    not 401. 401 is reserved for 'not authenticated'."""
+    from fastapi import HTTPException
+
+    from app.models import User
+    from app.services.auth import ROLE_OPERATOR, authorize, hash_password, issue_session
+
+    db = tmp_path / "authz.db"
+    monkeypatch.setenv("DATABASE_URL", f"sqlite:///{db}")
+    monkeypatch.setenv("SESSION_SECRET", "x" * 40)
+    from app.config import get_settings
+    get_settings.cache_clear()
+
+    import app.database as db_mod
+    from app.database import Base, create_db_engine, session_scope
+
+    engine = create_db_engine(f"sqlite:///{db}")
+    Base.metadata.create_all(bind=engine)
+    db_mod.engine = engine
+    db_mod.SessionLocal.configure(bind=engine)
+
+    with session_scope() as s:
+        op = User(username="oponly", password_hash=hash_password("p"), role=ROLE_OPERATOR, is_active=1)
+        s.add(op)
+        s.flush()
+        op_id = op.id
+
+    token = issue_session(op_id)
+
+    class _Req:
+        headers = {}
+
+    with pytest.raises(HTTPException) as exc:
+        authorize(request=_Req(), minimum="admin", nss_session=token)
+    assert exc.value.status_code == 403, exc.value.detail
+    assert "admin" in exc.value.detail
+
+    with pytest.raises(HTTPException) as exc:
+        authorize(request=_Req(), minimum="admin", nss_session=None)
+    assert exc.value.status_code == 401

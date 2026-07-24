@@ -7,9 +7,9 @@ import json
 import logging
 import os
 import shutil
+from collections.abc import Generator
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Generator
 
 from app.config import get_settings
 from app.services.image_ref import registry_host

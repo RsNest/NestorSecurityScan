@@ -2,12 +2,9 @@
 
 from __future__ import annotations
 
-from datetime import datetime
-
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import FileResponse
 
-from app.api.deps import require_api_key
 from app.database import session_scope
 from app.errors import ImageReferenceError, ScannerError
 from app.models import Scan

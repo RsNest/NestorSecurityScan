@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from app.config import get_settings
 from app.database import session_scope
@@ -23,7 +23,7 @@ def enqueue_rescan_recent() -> int:
         logger.info("Auto-rescan after DB update is disabled")
         return 0
 
-    cutoff = datetime.now(timezone.utc) - timedelta(days=settings.rescan_recent_days)
+    cutoff = datetime.now(UTC) - timedelta(days=settings.rescan_recent_days)
     enqueued = 0
     with session_scope() as session:
         candidates: list[Scan] = (

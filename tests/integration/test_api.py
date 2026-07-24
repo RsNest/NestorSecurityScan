@@ -1,6 +1,5 @@
 """Integration-ish API tests with TestClient (no real Redis required for health)."""
 
-import os
 from pathlib import Path
 
 import pytest

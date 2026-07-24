@@ -46,7 +46,7 @@ class HarborClient:
                     time.sleep(delay)
                 try:
                     response = client.request(method, path, **kwargs)
-                except httpx.TransportError as exc:
+                except httpx.TransportError:
                     last_exc = HarborError(
                         f"Harbor недоступен: {self.base}. Проверьте сеть и URL."
                     )

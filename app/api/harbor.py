@@ -4,14 +4,13 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from app.api.deps import require_api_key
+from app.api.scans import _to_summary
 from app.config import get_settings
 from app.errors import HarborError
 from app.schemas import HarborScanRequest, HarborStatus, ScanSummary
 from app.services.auth import CurrentUser, require_role
 from app.services.harbor_client import HarborClient
 from app.workers.queue import enqueue_scan
-from app.api.scans import _to_summary
 
 router = APIRouter(prefix="/api/v1/harbor", tags=["harbor"])
 

@@ -1,7 +1,7 @@
 """Grype DB bootstrap and readiness helpers."""
 
-from app.services.grype_db import NETWORK_HINT, _humanize_update_error, readiness_code
 from app.schemas import GrypeDbStatus
+from app.services.grype_db import NETWORK_HINT, _humanize_update_error, readiness_code
 
 
 def test_humanize_network_error():
@@ -14,9 +14,9 @@ def test_readiness_code_not_ready(monkeypatch, tmp_path):
     monkeypatch.setenv("DATA_DIR", str(tmp_path))
     monkeypatch.setenv("GRYPE_DB_CACHE_DIR", str(tmp_path / "grype"))
     monkeypatch.setenv("DATABASE_URL", f"sqlite:///{tmp_path}/t.db")
+    import app.database as database
     from app.config import get_settings
     from app.database import Base, create_db_engine
-    import app.database as database
 
     get_settings.cache_clear()
     database.engine = create_db_engine(f"sqlite:///{tmp_path}/t.db")

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, Form, Request
+from fastapi import APIRouter, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
@@ -15,12 +15,12 @@ from app.services.auth import (
     ROLE_ADMIN,
     ROLE_OPERATOR,
     ROLE_VIEWER,
+    SESSION_COOKIE,
     CurrentUser,
     _load_user,
     hash_password,
     read_session,
 )
-from app.services.auth import SESSION_COOKIE
 
 router = APIRouter(tags=["web"])
 _templates_dir = Path(__file__).resolve().parent.parent / "templates"
@@ -44,17 +44,29 @@ def _require_admin(request: Request) -> CurrentUser:
     if not u:
         raise RedirectResponse("/login", status_code=303)
     if not u.has_role(ROLE_ADMIN):
-        from fastapi import HTTPException, status
-
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Требуется роль admin"
+        body = templates.get_template("error.html").render(
+            {
+                "request": request,
+                "current_user": u,
+                "page": "users",
+                "status_code": 403,
+                "title": "Недостаточно прав",
+                "message": "Управление пользователями доступно только администраторам.",
+                "back_url": "/",
+                "back_label": "На дашборд",
+                "app_name": get_settings().app_name,
+            }
         )
+        return HTMLResponse(content=body, status_code=403)
     return u
 
 
 @router.get("/users", response_class=HTMLResponse)
 def users_page(request: Request) -> HTMLResponse:
-    current = _require_admin(request)
+    current_or_response = _require_admin(request)
+    if isinstance(current_or_response, HTMLResponse):
+        return current_or_response
+    current = current_or_response
     with session_scope() as session:
         users = session.query(User).order_by(User.id.asc()).all()
         for u in users:
@@ -79,8 +91,11 @@ def users_create(
     username: str = Form(...),
     password: str = Form(...),
     role: str = Form(ROLE_VIEWER),
-) -> RedirectResponse:
-    current = _require_admin(request)
+):
+    current_or_response = _require_admin(request)
+    if isinstance(current_or_response, HTMLResponse):
+        return current_or_response
+    current = current_or_response
     if role not in {ROLE_ADMIN, ROLE_OPERATOR, ROLE_VIEWER}:
         return templates.TemplateResponse(
             request,
@@ -136,8 +151,11 @@ def users_create(
 
 
 @router.post("/users/{user_id}/delete")
-def users_delete(request: Request, user_id: int) -> RedirectResponse:
-    current = _require_admin(request)
+def users_delete(request: Request, user_id: int):
+    current_or_response = _require_admin(request)
+    if isinstance(current_or_response, HTMLResponse):
+        return current_or_response
+    current = current_or_response
     if user_id == current.id:
         return RedirectResponse("/users", status_code=303)
     with session_scope() as session:

@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import bcrypt
 from fastapi import Cookie, Depends, Header, HTTPException, Request, status
-from itsdangerous import BadSignature, SignatureExpired, TimestampSigner, URLSafeTimedSerializer
+from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 
 from app.config import Settings, get_settings
 from app.database import session_scope
@@ -70,7 +70,7 @@ def authenticate(username: str, password: str) -> User | None:
             return None
         if not verify_password(password, user.password_hash):
             return None
-        user.last_login_at = datetime.now(timezone.utc)
+        user.last_login_at = datetime.now(UTC)
         session.expunge(user)
     return user
 
@@ -148,11 +148,14 @@ def authorize(
     x_api_key: str | None = None,
 ) -> CurrentUser:
     """Authorise either via session cookie (any role >= minimum) or via
-    legacy X-API-Key (treated as operator)."""
+    legacy X-API-Key (treated as operator).
+
+    - 401 when there is no valid session at all
+    - 403 when there IS a valid session but the role is too low
+    """
     settings = get_settings()
     if settings.api_key and x_api_key and x_api_key == settings.api_key:
-        # Treat legacy API key as an operator-equivalent principal without a User row.
-        return CurrentUser.__new__(CurrentUser).__init__ if False else _legacy_principal()
+        return _legacy_principal()
     if nss_session:
         user_id = read_session(nss_session)
         if user_id:
@@ -161,6 +164,10 @@ def authorize(
                 cu = CurrentUser(user)
                 if cu.has_role(minimum):
                     return cu
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail=f"Недостаточно прав (требуется роль {minimum})",
+                )
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Требуется аутентификация (сессия или X-API-Key)",

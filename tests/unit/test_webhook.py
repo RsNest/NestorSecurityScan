@@ -1,6 +1,5 @@
 """Webhook secret and payload parsing tests."""
 
-import hmac
 import inspect
 
 from app.api import webhooks

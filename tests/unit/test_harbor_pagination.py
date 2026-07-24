@@ -1,7 +1,6 @@
 """Harbor client pagination tests with httpx mock transport."""
 
 import httpx
-import pytest
 
 from app.config import Settings
 from app.services.harbor_client import HarborClient
