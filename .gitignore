@@ -20,3 +20,10 @@ certs/*
 *.db
 .idea/
 .vscode/
+
+# Local integration test artifacts (Harbor installer + runtime data).
+# We commit only the *scripts* under tests/integration/harbor/ (e.g. run.py,
+# README), but ignore the upstream installer tarball and its unpacked tree.
+tests/integration/harbor/harbor.tgz
+tests/integration/harbor/harbor/
+tests/integration/harbor/data/

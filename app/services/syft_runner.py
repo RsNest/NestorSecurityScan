@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import re
 from pathlib import Path
 
@@ -32,9 +33,24 @@ def generate_sbom(
     settings = get_settings()
     syft_json = report_dir / "sbom.syft.json"
     cyclonedx = report_dir / "sbom.cyclonedx.json"
+    # Syft needs the `registry:` source prefix when the image lives in a
+    # remote OCI registry (no Docker daemon available in our worker). This
+    # also makes the resolver skip the Docker fallback chain (which would
+    # otherwise fail with "docker not available").
+    # We do NOT prefix if the caller already supplied an explicit scheme
+    # (e.g. `docker:`, `oci-dir:`, `registry:`, ...).
+    explicit_schemes = (
+        "docker:", "docker-archive:", "oci-archive:", "oci-dir:",
+        "registry:", "oci-registry:", "podman:", "containerd:",
+        "singularity:", "local-file:", "local-directory:", "oci-model-registry:",
+    )
+    src = image_reference
+    if ":" in src.split("/")[0] and not src.startswith(explicit_schemes):
+        # host:port/...  → registry:host:port/...
+        src = f"registry:{src}"
     args = [
         settings.syft_bin,
-        image_reference,
+        src,
         "-o",
         f"syft-json={syft_json}",
         "-o",
@@ -42,6 +58,12 @@ def generate_sbom(
     ]
     if platform:
         args.extend(["--platform", platform])
+    # Force plain HTTP for registry lookups when the caller opted in via
+    # env (used for plain-HTTP private registries like a local Harbor).
+    if os.environ.get("REGISTRY_INSECURE_HTTP") == "1":
+        env = dict(env or {})
+        env.setdefault("DOCKER_INSECURE", "1")
+        # No-op if syft doesn't honor it; this is best-effort.
 
     result = run_command(
         args,

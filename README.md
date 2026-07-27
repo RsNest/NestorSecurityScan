@@ -93,6 +93,8 @@ curl -X POST http://localhost:8080/api/v1/scans \
 
 ## Harbor
 
+Локальную smoke-проверку end-to-end (поднять Harbor + scanner + webhook + push образа) см. в [docs/integrations/harbor.md](docs/integrations/harbor.md).
+
 1. Создайте Robot Account с минимальными правами:
    - pull repository
    - list repository

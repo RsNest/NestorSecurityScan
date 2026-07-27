@@ -150,5 +150,13 @@ class HarborClient:
         if not digest:
             return None
         host = self.base.replace("https://", "").replace("http://", "").split("/")[0]
+        # Inside our docker stack, the worker reaches the host via
+        # host.docker.internal. If the operator configured HARBOR_URL with
+        # localhost, rewrite to host.docker.internal so Syft/Grype can pull.
+        # Operators pointing at a real hostname or to a registry on the
+        # compose network should override HARBOR_URL accordingly.
+        host_for_pull = host
+        if host.startswith("localhost:") or host == "localhost":
+            host_for_pull = f"host.docker.internal:{host.split(':', 1)[1]}" if ":" in host else "host.docker.internal"
         full_repo = repository if repository.startswith(f"{project}/") else f"{project}/{repository}"
-        return f"{host}/{full_repo}@{digest}"
+        return f"{host_for_pull}/{full_repo}@{digest}"
