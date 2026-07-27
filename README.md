@@ -123,7 +123,7 @@ HARBOR_WEBHOOK_SECRET=change-me
 https://<scanner-host>/api/v1/webhooks/harbor?secret=<HARBOR_WEBHOOK_SECRET>
 ```
 
-или заголовок `X-Harbor-Auth` / `Authorization: Bearer <secret>`.
+или заголовок `X-Harbor-Auth` / `Authorization: Bearer &lt;secret&gt;`.
 
 Endpoint сразу возвращает `202` и ставит задачу в очередь.
 
@@ -153,7 +153,7 @@ ignore:
 
 ## Формат отчётов
 
-`/data/reports/<scan-id>/`:
+`/data/reports/&lt;scan-id&gt;/`:
 
 - `metadata.json`
 - `sbom.syft.json`
@@ -233,7 +233,7 @@ Health и webhook — **без** авторизации.
 
 После входа (`admin` / `admin` по умолчанию) открывается **Дашборд** — единая точка обзора безопасности образов.
 
-![Dashboard](docs/screenshots/dashboard.png)
+![Dashboard](https://raw.githubusercontent.com/RsNest/NestorSecurityScan/main/docs/screenshots/dashboard.png)
 
 ### Страницы
 
@@ -264,7 +264,7 @@ RBAC на уровне **и API, и web-роутов**. Недостаточно
 
 Три режима: **Светлая** ☀, **Тёмная** ☾, **Системная** ◐ (следует `prefers-color-scheme`).
 
-- Тема применяется **до** первого рендера через inline-скрипт в `<head>` — нет Flash Of Unstyled Content
+- Тема применяется **до** первого рендера через inline-скрипт в <code>&lt;head&gt;</code> — нет Flash Of Unstyled Content
 - Выбор сохраняется в cookie `nss_theme`, доступен с любой страницы
 - Тоггл в правом верхнем углу — цикл по 3 состояниям
 
