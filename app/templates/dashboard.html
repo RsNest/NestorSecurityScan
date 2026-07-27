@@ -56,12 +56,12 @@
   <section class="panel">
     <h2>Динамика за 7 дней</h2>
     {% if posture.trend %}
+      {% set max_v = 1 %}
+      {% for x in posture.trend %}{% if x.scans > max_v %}{% set max_v = x.scans %}{% endif %}{% endfor %}
       <div class="trend">
         {% for d in posture.trend %}
-          {% set max_v = 1 %}
-          {% for x in posture.trend %}{% if x.scans > max_v %}{% set max_v = x.scans %}{% endif %}{% endfor %}
-          <div class="trend-bar" style="height: {{ (d.scans * 90 / max_v)|round(1) if max_v else 0 }}%" title="{{ d.date }}: {{ d.scans }} сканов, {{ d.non_compliant }} non-compliant">
-            <span class="nb">{{ d.scans }}</span>
+          <div class="trend-bar{% if d.non_compliant %} bad{% endif %}" style="height: {% if max_v > 0 %}{{ (d.scans * 100 / max_v)|round(1) }}{% else %}0{% endif %}%" title="{{ d.date }}: {{ d.scans }} сканов, {{ d.non_compliant }} non-compliant">
+            <span>{{ d.scans }}</span>
           </div>
         {% endfor %}
       </div>
